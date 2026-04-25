@@ -482,6 +482,9 @@
       socket.emit('join', myName);
     }
   });
+
+  // Enter per entrare
+  document.getElementById('name').addEventListener('keydown', e => {
     if (e.key === 'Enter') join();
   });
 </script>
