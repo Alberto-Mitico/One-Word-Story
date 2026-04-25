@@ -335,6 +335,63 @@
       100% { opacity: 1; transform: scale(1); color: var(--gold); }
     }
 
+    /* ── Personaggi button ── */
+    .btn-personaggi {
+      font-size: 11px;
+      padding: 8px 18px;
+      background: transparent;
+      color: var(--rust);
+      border-color: var(--rust);
+      letter-spacing: 0.15em;
+    }
+
+    .btn-personaggi:hover {
+      background: var(--rust);
+      color: var(--paper);
+      border-color: var(--rust);
+    }
+
+    /* ── Personaggi panel ── */
+    #personaggi-panel {
+      background: var(--cream);
+      border: 2px solid var(--ink);
+      padding: 20px 24px;
+      box-shadow: 4px 4px 0 var(--ink);
+      animation: slideUp 0.25s ease both;
+    }
+
+    #personaggi-title {
+      font-size: 10px;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 14px;
+    }
+
+    #personaggi-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .personaggio-tag {
+      font-family: 'Playfair Display', serif;
+      font-size: 13px;
+      font-style: italic;
+      padding: 6px 14px;
+      border: 1.5px solid var(--ink);
+      background: #fff;
+      cursor: pointer;
+      border-radius: 2px;
+      transition: background 0.15s, color 0.15s, transform 0.1s;
+    }
+
+    .personaggio-tag:hover {
+      background: var(--ink);
+      color: var(--paper);
+      transform: translateY(-1px);
+    }
+
     /* ── Footer ── */
     footer {
       margin-top: 60px;
@@ -364,6 +421,16 @@
 <!-- Main game -->
 <div id="main">
 
+  <div style="display:flex;justify-content:flex-end;margin-bottom:-12px;">
+    <button class="btn btn-personaggi" onclick="togglePersonaggiPanel()">Personaggi</button>
+  </div>
+
+  <!-- Pannello personaggi -->
+  <div id="personaggi-panel" style="display:none;">
+    <div id="personaggi-title">Scegli un personaggio</div>
+    <div id="personaggi-list"></div>
+  </div>
+
   <div id="players-strip">
     <span class="players-label">Narratori</span>
     <div id="players-list" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
@@ -384,7 +451,7 @@
   </div>
 
   <div id="word-area">
-    <button class="btn btn-personaggio" id="btn-personaggio" onclick="togglePersonaggio()" title="Modalità personaggio: puoi scrivere più parole">Personaggio</button>
+    <button class="btn btn-personaggio" id="btn-personaggio" onclick="togglePersonaggio()" title="Modalità personaggio: puoi scrivere più parole">Nuovo personaggio</button>
     <input id="word" placeholder="la tua parola…" autocomplete="off" />
     <button class="btn btn-ghost" onclick="sendWord()">Invia</button>
   </div>
@@ -536,6 +603,62 @@
       return `<span class="player-tag ${active ? 'active' : ''} ${away ? 'away' : ''}">${name}${away ? ' ↻' : ''}</span>`;
     }).join('');
   });
+
+  // ── Personaggi ──
+  const PERSONAGGI = [
+    "Capocantiere",
+    "Dwayne the rock detto Johnson",
+    "Tacchino enorme",
+    "Anna Bolena",
+    "Papa Schlump (Grande)",
+    "Gargamella",
+    "Anatroccolo",
+    "Anatroccola",
+    "San Giuseppe di Michael (goat)",
+    "Primo Levi",
+    "Marco Polo",
+    "Stretto sciatore sciamano sciagurato",
+    "Abraham Lincoln",
+    "Hammurabi",
+    "Rosa Parks",
+    "Schopenhauer",
+    "Gianmarco Zagato",
+    "Contadino",
+    "Optimus Prime",
+    "l’Ape principessa (carinissima)",
+    "Tartarughina"
+  ];
+
+  function togglePersonaggiPanel() {
+    const panel = document.getElementById('personaggi-panel');
+    const isVisible = panel.style.display !== 'none';
+    if (isVisible) {
+      panel.style.display = 'none';
+      return;
+    }
+    // Popola la lista
+    const list = document.getElementById('personaggi-list');
+    list.innerHTML = PERSONAGGI.map((p, i) =>
+      `<span class="personaggio-tag" onclick="selectPersonaggio(${i})">${p}</span>`
+    ).join('');
+    panel.style.display = 'block';
+  }
+
+  function selectPersonaggio(idx) {
+    const nome = PERSONAGGI[idx];
+    // Attiva modalità personaggio e inserisce il nome nel campo
+    personaggioMode = true;
+    const btn = document.getElementById('btn-personaggio');
+    btn.classList.add('active');
+    const wordInput = document.getElementById('word');
+    wordInput.placeholder = 'scrivi la battuta del personaggio…';
+    wordInput.value = nome + ': ';
+    wordInput.focus();
+    // Porta il cursore alla fine
+    wordInput.setSelectionRange(wordInput.value.length, wordInput.value.length);
+    // Chiudi il pannello
+    document.getElementById('personaggi-panel').style.display = 'none';
+  }
 
   // Riconnessione automatica: se il socket si riconnette, rimanda il nome
   socket.on('connect', () => {
