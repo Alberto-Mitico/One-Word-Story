@@ -148,6 +148,18 @@
       color: var(--paper);
     }
 
+    .btn-personaggio {
+      background: transparent;
+      color: var(--gold);
+      border-color: var(--gold);
+    }
+
+    .btn-personaggio:hover, .btn-personaggio.active {
+      background: var(--gold);
+      border-color: var(--gold);
+      color: var(--ink);
+    }
+
     /* ── Main area ── */
     #main {
       width: 100%;
@@ -372,6 +384,7 @@
   </div>
 
   <div id="word-area">
+    <button class="btn btn-personaggio" id="btn-personaggio" onclick="togglePersonaggio()" title="Modalità personaggio: puoi scrivere più parole">Personaggio</button>
     <input id="word" placeholder="la tua parola…" autocomplete="off" />
     <button class="btn btn-ghost" onclick="sendWord()">Invia</button>
   </div>
@@ -402,23 +415,71 @@
     setTimeout(() => { el.textContent = ''; }, 2000);
   }
 
+  let personaggioMode = false;
+
+  function togglePersonaggio() {
+    personaggioMode = !personaggioMode;
+    const btn = document.getElementById('btn-personaggio');
+    const wordInput = document.getElementById('word');
+    if (personaggioMode) {
+      btn.classList.add('active');
+      wordInput.placeholder = 'scrivi la battuta del personaggio…';
+    } else {
+      btn.classList.remove('active');
+      wordInput.placeholder = 'la tua parola…';
+    }
+    wordInput.focus();
+  }
+
+  function spaceAllowed(current) {
+    if (personaggioMode) return true;
+    const trimmed = current.trim();
+    if (!trimmed) return false;
+    if (trimmed.includes(' ')) return false;
+    if (/[.!?,;:]$/.test(trimmed)) return true;
+    if (/^["«“‘']/.test(trimmed)) return true;
+    return false;
+  }
+
+  function isValidWord(word) {
+    if (personaggioMode) return word.trim().length > 0;
+    const trimmed = word.trim();
+    if (!trimmed) return false;
+    const parts = trimmed.split(' ');
+    if (parts.length > 2) return false;
+    if (parts.length === 2) {
+      const startsWithQuote = /^["«“‘']/.test(trimmed);
+      const firstEndsPunct = /[.!?,;:]$/.test(parts[0]);
+      if (!startsWithQuote && !firstEndsPunct) return false;
+    }
+    return true;
+  }
+
   function sendWord() {
     const wordInput = document.getElementById('word');
     const word = wordInput.value.trim();
     if (!word) return;
-    if (word.includes(' ')) {
-      showError('⚠ Solo una parola alla volta!');
+    if (!isValidWord(word)) {
+      showError('⚠ Solo una parola (o punteggiatura + parola)!');
       return;
     }
     socket.emit('word', word);
     wordInput.value = '';
+    // Disattiva modalità personaggio dopo l'invio
+    if (personaggioMode) {
+      personaggioMode = false;
+      document.getElementById('btn-personaggio').classList.remove('active');
+      wordInput.placeholder = 'la tua parola…';
+    }
   }
 
-  // Block spaces live while typing
   document.getElementById('word').addEventListener('keydown', e => {
     if (e.key === ' ') {
-      e.preventDefault();
-      showError('⚠ Solo una parola!');
+      const current = document.getElementById('word').value;
+      if (!spaceAllowed(current)) {
+        e.preventDefault();
+        showError('⚠ Solo una parola!');
+      }
     }
     if (e.key === 'Enter') sendWord();
   });
