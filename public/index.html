@@ -189,6 +189,11 @@
       color: var(--paper);
     }
 
+    .player-tag.away {
+      opacity: 0.45;
+      border-style: dashed;
+    }
+
     /* ── Turn banner ── */
     #turn-banner {
       background: var(--cream);
@@ -461,15 +466,22 @@
 
   socket.on('turn', name => updateTurnUI(name));
 
-  socket.on('players', names => {
+  socket.on('players', players => {
     const list = document.getElementById('players-list');
-    list.innerHTML = names.map(n =>
-      `<span class="player-tag ${n === currentTurn ? 'active' : ''}">${n}</span>`
-    ).join('');
+    list.innerHTML = players.map(p => {
+      const name = typeof p === 'object' ? p.name : p;
+      const away = typeof p === 'object' ? p.disconnected : false;
+      const active = name === currentTurn;
+      return `<span class="player-tag ${active ? 'active' : ''} ${away ? 'away' : ''}">${name}${away ? ' ↻' : ''}</span>`;
+    }).join('');
   });
 
-  // Enter to join
-  document.getElementById('name').addEventListener('keydown', e => {
+  // Riconnessione automatica: se il socket si riconnette, rimanda il nome
+  socket.on('connect', () => {
+    if (myName) {
+      socket.emit('join', myName);
+    }
+  });
     if (e.key === 'Enter') join();
   });
 </script>
