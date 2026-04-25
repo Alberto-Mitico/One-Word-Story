@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>One Word Story</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    #story { font-size: 20px; margin: 20px 0; }
+    input { font-size: 18px; }
+  </style>
+</head>
+<body>
+
+<h2>One Word Story</h2>
+
+<div>
+  Nome: <input id="name" />
+  <button onclick="join()">Entra</button>
+</div>
+
+<p id="turn"></p>
+<div id="story"></div>
+
+<input id="word" placeholder="una parola..." />
+<button onclick="sendWord()">Invia</button>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  const socket = io();
+
+  function join() {
+    const name = document.getElementById("name").value;
+    socket.emit("join", name);
+  }
+
+  function sendWord() {
+    const word = document.getElementById("word").value;
+    socket.emit("word", word);
+    document.getElementById("word").value = "";
+  }
+
+  socket.on("story", story => {
+    document.getElementById("story").innerText = story.join(" ");
+  });
+
+  socket.on("turn", name => {
+    document.getElementById("turn").innerText = "Tocca a: " + name;
+  });
+</script>
+
+</body>
+</html>
