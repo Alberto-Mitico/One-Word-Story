@@ -2,49 +2,443 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>One Word Story</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
-    body { font-family: sans-serif; padding: 20px; }
-    #story { font-size: 20px; margin: 20px 0; }
-    input { font-size: 18px; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink: #1a1208;
+      --paper: #f5f0e8;
+      --cream: #ede6d3;
+      --gold: #c8952a;
+      --gold-light: #e8b84b;
+      --rust: #8b3a1e;
+      --muted: #8a7d68;
+      --shadow: rgba(26,18,8,0.15);
+    }
+
+    body {
+      background: var(--paper);
+      color: var(--ink);
+      font-family: 'DM Mono', monospace;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0 16px 60px;
+      background-image:
+        radial-gradient(ellipse at 20% 10%, rgba(200,149,42,0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 90%, rgba(139,58,30,0.06) 0%, transparent 50%);
+    }
+
+    /* ── Header ── */
+    header {
+      width: 100%;
+      max-width: 720px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 48px 0 32px;
+      border-bottom: 2px solid var(--ink);
+      margin-bottom: 40px;
+    }
+
+    .eyebrow {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 10px;
+    }
+
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(40px, 8vw, 72px);
+      font-weight: 700;
+      line-height: 1;
+      letter-spacing: -0.02em;
+      text-align: center;
+    }
+
+    h1 em {
+      font-style: italic;
+      color: var(--gold);
+    }
+
+    .subtitle {
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      margin-top: 12px;
+    }
+
+    /* ── Join panel ── */
+    #join-panel {
+      width: 100%;
+      max-width: 420px;
+      background: var(--cream);
+      border: 2px solid var(--ink);
+      border-radius: 2px;
+      padding: 32px;
+      margin-bottom: 36px;
+      box-shadow: 6px 6px 0 var(--ink);
+      animation: slideUp 0.4s ease both;
+    }
+
+    #join-panel label {
+      display: block;
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    #name {
+      width: 100%;
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
+      font-style: italic;
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid var(--ink);
+      padding: 8px 0;
+      outline: none;
+      color: var(--ink);
+      transition: border-color 0.2s;
+      margin-bottom: 24px;
+    }
+
+    #name:focus { border-color: var(--gold); }
+    #name::placeholder { color: var(--muted); opacity: 0.6; }
+
+    /* ── Buttons ── */
+    .btn {
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      border: 2px solid var(--ink);
+      background: var(--ink);
+      color: var(--paper);
+      padding: 12px 28px;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s, transform 0.1s;
+      border-radius: 1px;
+    }
+
+    .btn:hover {
+      background: var(--gold);
+      border-color: var(--gold);
+      color: var(--ink);
+    }
+
+    .btn:active { transform: translateY(1px); }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--ink);
+    }
+
+    .btn-ghost:hover {
+      background: var(--ink);
+      color: var(--paper);
+    }
+
+    /* ── Main area ── */
+    #main {
+      width: 100%;
+      max-width: 720px;
+      display: none;
+      flex-direction: column;
+      gap: 28px;
+      animation: slideUp 0.4s ease both;
+    }
+
+    #main.visible { display: flex; }
+
+    /* ── Players strip ── */
+    #players-strip {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .players-label {
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-right: 4px;
+    }
+
+    .player-tag {
+      font-size: 12px;
+      padding: 4px 12px;
+      border: 1.5px solid var(--ink);
+      border-radius: 100px;
+      transition: all 0.2s;
+    }
+
+    .player-tag.active {
+      background: var(--ink);
+      color: var(--paper);
+    }
+
+    /* ── Turn banner ── */
+    #turn-banner {
+      background: var(--cream);
+      border: 2px solid var(--ink);
+      border-left: 6px solid var(--gold);
+      padding: 14px 20px;
+      font-size: 13px;
+      letter-spacing: 0.05em;
+    }
+
+    #turn-banner strong {
+      font-family: 'Playfair Display', serif;
+      font-size: 18px;
+      font-style: italic;
+      color: var(--gold);
+    }
+
+    /* ── Story display ── */
+    #story-container {
+      background: #fff;
+      border: 2px solid var(--ink);
+      min-height: 180px;
+      padding: 28px 32px;
+      box-shadow: 4px 4px 0 var(--shadow);
+    }
+
+    #story-title {
+      font-size: 10px;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    #story-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--cream);
+    }
+
+    #story {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(18px, 3vw, 24px);
+      line-height: 1.75;
+      color: var(--ink);
+    }
+
+    #story .story-line {
+      display: block;
+      animation: fadeWord 0.3s ease both;
+    }
+
+    #story .word-new {
+      color: var(--gold);
+      animation: popWord 0.4s ease both;
+    }
+
+    /* ── Word input ── */
+    #word-area {
+      display: flex;
+      gap: 12px;
+      align-items: stretch;
+    }
+
+    #word {
+      flex: 1;
+      font-family: 'Playfair Display', serif;
+      font-size: 20px;
+      font-style: italic;
+      background: var(--cream);
+      border: 2px solid var(--ink);
+      padding: 14px 18px;
+      outline: none;
+      color: var(--ink);
+      transition: border-color 0.2s, box-shadow 0.2s;
+      border-radius: 1px;
+    }
+
+    #word:focus {
+      border-color: var(--gold);
+      box-shadow: 3px 3px 0 var(--gold);
+    }
+
+    #word::placeholder { color: var(--muted); opacity: 0.5; }
+
+    #word:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    /* ── Word count ── */
+    #word-count {
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      text-align: right;
+    }
+
+    /* ── Animations ── */
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeWord {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    @keyframes popWord {
+      0%   { opacity: 0; transform: scale(0.8); color: var(--gold); }
+      60%  { transform: scale(1.05); }
+      100% { opacity: 1; transform: scale(1); color: var(--gold); }
+    }
+
+    /* ── Footer ── */
+    footer {
+      margin-top: 60px;
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      opacity: 0.6;
+    }
   </style>
 </head>
 <body>
 
-<h2>One Word Story</h2>
+<header>
+  <p class="eyebrow">Un racconto collettivo</p>
+  <h1>One <em>Word</em> Story</h1>
+  <p class="subtitle">Una parola alla volta · Un'storia insieme</p>
+</header>
 
-<div>
-  Nome: <input id="name" />
-  <button onclick="join()">Entra</button>
+<!-- Join -->
+<div id="join-panel">
+  <label for="name">Il tuo nome</label>
+  <input id="name" placeholder="scrivi il tuo nome…" autocomplete="off" />
+  <button class="btn" onclick="join()">Entra nella storia →</button>
 </div>
 
-<p id="turn"></p>
-<div id="story"></div>
+<!-- Main game -->
+<div id="main">
 
-<input id="word" placeholder="una parola..." />
-<button onclick="sendWord()">Invia</button>
+  <div id="players-strip">
+    <span class="players-label">Narratori</span>
+    <div id="players-list" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
+  </div>
+
+  <div id="turn-banner">
+    Tocca a: <strong id="turn-name">—</strong>
+  </div>
+
+  <div id="story-container">
+    <div id="story-title">La storia fin qui</div>
+    <div id="story"></div>
+  </div>
+
+  <div id="word-count">0 parole</div>
+
+  <div id="word-area">
+    <input id="word" placeholder="la tua parola…" autocomplete="off" onkeydown="if(event.key==='Enter') sendWord()" />
+    <button class="btn btn-ghost" onclick="sendWord()">Invia</button>
+  </div>
+
+</div>
+
+<footer>One Word Story &mdash; gioco collaborativo</footer>
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
   const socket = io();
+  let myName = '';
+  let currentTurn = '';
+  let allWords = [];
 
   function join() {
-    const name = document.getElementById("name").value;
-    socket.emit("join", name);
+    const nameInput = document.getElementById('name');
+    myName = nameInput.value.trim();
+    if (!myName) return;
+    socket.emit('join', myName);
+    document.getElementById('join-panel').style.display = 'none';
+    document.getElementById('main').classList.add('visible');
   }
 
   function sendWord() {
-    const word = document.getElementById("word").value;
-    socket.emit("word", word);
-    document.getElementById("word").value = "";
+    const wordInput = document.getElementById('word');
+    const word = wordInput.value.trim();
+    if (!word) return;
+    socket.emit('word', word);
+    wordInput.value = '';
   }
 
-  socket.on("story", story => {
-    document.getElementById("story").innerText = story.join(" ");
+  function renderStory(words) {
+    allWords = words;
+    const container = document.getElementById('story');
+    const count = words.length;
+
+    // Build lines of 8 words each
+    const lines = [];
+    for (let i = 0; i < words.length; i += 8) {
+      lines.push(words.slice(i, i + 8));
+    }
+
+    let html = '';
+    lines.forEach((line, li) => {
+      const isLastLine = li === lines.length - 1;
+      const wordSpans = line.map((w, wi) => {
+        const globalIdx = li * 8 + wi;
+        const isNew = globalIdx === count - 1;
+        return `<span class="${isNew ? 'word-new' : ''}">${w}</span>`;
+      }).join(' ');
+      html += `<span class="story-line">${wordSpans}</span>\n`;
+    });
+
+    container.innerHTML = html || '<span style="color:var(--muted);font-style:italic;font-size:16px">La storia non è ancora iniziata…</span>';
+
+    // Update word count
+    document.getElementById('word-count').textContent =
+      count === 0 ? '0 parole' : count === 1 ? '1 parola' : `${count} parole`;
+  }
+
+  function updateTurnUI(name) {
+    currentTurn = name;
+    document.getElementById('turn-name').textContent = name || '—';
+    const wordInput = document.getElementById('word');
+    const isMyTurn = myName && name === myName;
+    wordInput.disabled = !isMyTurn;
+    wordInput.placeholder = isMyTurn ? 'la tua parola…' : `aspetta il turno di ${name}…`;
+    if (isMyTurn) wordInput.focus();
+  }
+
+  socket.on('story', words => renderStory(words));
+
+  socket.on('turn', name => updateTurnUI(name));
+
+  socket.on('players', names => {
+    const list = document.getElementById('players-list');
+    list.innerHTML = names.map(n =>
+      `<span class="player-tag ${n === currentTurn ? 'active' : ''}">${n}</span>`
+    ).join('');
   });
 
-  socket.on("turn", name => {
-    document.getElementById("turn").innerText = "Tocca a: " + name;
+  // Enter to join
+  document.getElementById('name').addEventListener('keydown', e => {
+    if (e.key === 'Enter') join();
   });
 </script>
 
