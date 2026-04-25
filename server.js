@@ -25,13 +25,27 @@ io.on("connection", (socket) => {
     turn = (turn + 1) % players.length;
 
     io.emit("story", story);
-    io.emit("turn", players[turn].name);
+    io.emit("turn", players[turn]?.name);
   });
 
   socket.on("disconnect", () => {
+    const disconnectedIndex = players.findIndex(p => p.id === socket.id);
     players = players.filter(p => p.id !== socket.id);
-    turn = 0;
+
+    if (players.length === 0) {
+      turn = 0;
+    } else {
+      // If the disconnected player was before or at the current turn,
+      // adjust turn so the same next player still goes
+      if (disconnectedIndex <= turn) {
+        turn = (turn - 1 + players.length) % players.length;
+      }
+      // Keep turn in bounds
+      turn = turn % players.length;
+    }
+
     io.emit("players", players.map(p => p.name));
+    io.emit("turn", players[turn]?.name); // <-- this was missing!
   });
 });
 
