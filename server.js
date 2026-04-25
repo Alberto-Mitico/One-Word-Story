@@ -42,7 +42,8 @@ io.on("connection", (socket) => {
     if (players[turn]?.id !== socket.id) return;
     if (typeof word !== "string") return;
     const clean = word.trim();
-    if (!clean || clean.includes(" ")) return;
+    if (!clean) return;
+    // Nessun limite sul numero di parole: la validazione è gestita dal client.
 
     story.push(clean);
 
