@@ -283,6 +283,16 @@
       cursor: not-allowed;
     }
 
+    /* ── Error message ── */
+    #word-error {
+      font-size: 11px;
+      color: var(--rust);
+      letter-spacing: 0.05em;
+      min-height: 16px;
+      text-align: left;
+      transition: opacity 0.2s;
+    }
+
     /* ── Word count ── */
     #word-count {
       font-size: 11px;
@@ -351,10 +361,13 @@
     <div id="story"></div>
   </div>
 
-  <div id="word-count">0 parole</div>
+  <div style="display:flex;justify-content:space-between;align-items:center;">
+    <div id="word-error"></div>
+    <div id="word-count">0 parole</div>
+  </div>
 
   <div id="word-area">
-    <input id="word" placeholder="la tua parola…" autocomplete="off" onkeydown="if(event.key==='Enter') sendWord()" />
+    <input id="word" placeholder="la tua parola…" autocomplete="off" />
     <button class="btn btn-ghost" onclick="sendWord()">Invia</button>
   </div>
 
@@ -378,13 +391,32 @@
     document.getElementById('main').classList.add('visible');
   }
 
+  function showError(msg) {
+    const el = document.getElementById('word-error');
+    el.textContent = msg;
+    setTimeout(() => { el.textContent = ''; }, 2000);
+  }
+
   function sendWord() {
     const wordInput = document.getElementById('word');
     const word = wordInput.value.trim();
     if (!word) return;
+    if (word.includes(' ')) {
+      showError('⚠ Solo una parola alla volta!');
+      return;
+    }
     socket.emit('word', word);
     wordInput.value = '';
   }
+
+  // Block spaces live while typing
+  document.getElementById('word').addEventListener('keydown', e => {
+    if (e.key === ' ') {
+      e.preventDefault();
+      showError('⚠ Solo una parola!');
+    }
+    if (e.key === 'Enter') sendWord();
+  });
 
   function renderStory(words) {
     allWords = words;
