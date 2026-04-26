@@ -359,6 +359,27 @@
       border-color: var(--rust);
     }
 
+    /* ── Salta button ── */
+    .btn-salta {
+      font-size: 11px;
+      padding: 8px 18px;
+      background: transparent;
+      color: var(--muted);
+      border-color: var(--muted);
+      letter-spacing: 0.15em;
+    }
+
+    .btn-salta:hover:not(:disabled) {
+      background: var(--muted);
+      color: var(--paper);
+      border-color: var(--muted);
+    }
+
+    .btn-salta:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
     /* ── Chat button ── */
     .btn-chat {
       font-size: 11px;
@@ -624,6 +645,7 @@
 <div id="main">
 
   <div class="top-buttons">
+    <button class="btn btn-salta" id="btn-salta" onclick="saltaTurno()" disabled>Salta</button>
     <button class="btn btn-personaggi" onclick="togglePersonaggiPanel()">Personaggi</button>
     <button class="btn btn-chat" onclick="openChat()" id="btn-chat">
       Chat
@@ -805,10 +827,17 @@
     currentTurn = name;
     document.getElementById('turn-name').textContent = name || '—';
     const wordInput = document.getElementById('word');
+    const btnSalta = document.getElementById('btn-salta');
     const isMyTurn = myName && name === myName;
     wordInput.disabled = !isMyTurn;
     wordInput.placeholder = isMyTurn ? 'la tua parola…' : `aspetta il turno di ${name}…`;
+    btnSalta.disabled = !isMyTurn;
     if (isMyTurn) wordInput.focus();
+  }
+
+  function saltaTurno() {
+    if (!myName || currentTurn !== myName) return;
+    socket.emit('skip');
   }
 
   socket.on('story', words => renderStory(words));
