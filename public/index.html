@@ -335,6 +335,14 @@
       100% { opacity: 1; transform: scale(1); color: var(--gold); }
     }
 
+    /* ── Top-right buttons strip ── */
+    .top-buttons {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-bottom: -12px;
+    }
+
     /* ── Personaggi button ── */
     .btn-personaggi {
       font-size: 11px;
@@ -349,6 +357,44 @@
       background: var(--rust);
       color: var(--paper);
       border-color: var(--rust);
+    }
+
+    /* ── Chat button ── */
+    .btn-chat {
+      font-size: 11px;
+      padding: 8px 18px;
+      background: transparent;
+      color: var(--ink);
+      border-color: var(--ink);
+      letter-spacing: 0.15em;
+      position: relative;
+    }
+
+    .btn-chat:hover {
+      background: var(--ink);
+      color: var(--paper);
+      border-color: var(--ink);
+    }
+
+    /* badge messaggi non letti */
+    #chat-badge {
+      display: none;
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      width: 16px;
+      height: 16px;
+      background: var(--rust);
+      color: var(--paper);
+      font-size: 9px;
+      border-radius: 50%;
+      align-items: center;
+      justify-content: center;
+      font-family: 'DM Mono', monospace;
+    }
+
+    #chat-badge.visible {
+      display: flex;
     }
 
     /* ── Personaggi panel ── */
@@ -392,6 +438,162 @@
       transform: translateY(-1px);
     }
 
+    /* ── Chat modal ── */
+    #chat-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(26,18,8,0.45);
+      z-index: 100;
+      align-items: flex-end;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    #chat-overlay.open {
+      display: flex;
+    }
+
+    #chat-modal {
+      width: 100%;
+      max-width: 520px;
+      background: var(--paper);
+      border: 2px solid var(--ink);
+      box-shadow: 6px 6px 0 var(--ink);
+      display: flex;
+      flex-direction: column;
+      max-height: 60vh;
+      animation: slideUp 0.25s ease both;
+    }
+
+    #chat-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 20px;
+      border-bottom: 2px solid var(--ink);
+      background: var(--cream);
+    }
+
+    #chat-header-title {
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    #chat-close {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 18px;
+      color: var(--ink);
+      line-height: 1;
+      padding: 0 4px;
+      font-family: 'DM Mono', monospace;
+    }
+
+    #chat-close:hover { color: var(--rust); }
+
+    #chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .chat-msg {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      animation: fadeWord 0.25s ease both;
+    }
+
+    .chat-msg-meta {
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+    }
+
+    .chat-msg-meta .chat-name {
+      color: var(--gold);
+      font-weight: 500;
+    }
+
+    .chat-msg-meta .chat-name.is-me {
+      color: var(--rust);
+    }
+
+    .chat-msg-text {
+      font-family: 'Playfair Display', serif;
+      font-size: 15px;
+      line-height: 1.5;
+      color: var(--ink);
+      background: var(--cream);
+      border-left: 3px solid var(--gold);
+      padding: 8px 12px;
+      border-radius: 0 2px 2px 0;
+    }
+
+    .chat-msg.is-me .chat-msg-text {
+      border-left-color: var(--rust);
+      background: #fff;
+    }
+
+    #chat-empty {
+      color: var(--muted);
+      font-size: 12px;
+      font-style: italic;
+      text-align: center;
+      margin: auto;
+      opacity: 0.7;
+    }
+
+    #chat-input-area {
+      display: flex;
+      gap: 0;
+      border-top: 2px solid var(--ink);
+    }
+
+    #chat-input {
+      flex: 1;
+      font-family: 'Playfair Display', serif;
+      font-size: 16px;
+      font-style: italic;
+      background: var(--cream);
+      border: none;
+      padding: 14px 16px;
+      outline: none;
+      color: var(--ink);
+      resize: none;
+      min-height: 52px;
+      max-height: 120px;
+    }
+
+    #chat-input::placeholder { color: var(--muted); opacity: 0.6; }
+
+    #chat-send {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      border: none;
+      border-left: 2px solid var(--ink);
+      background: var(--ink);
+      color: var(--paper);
+      padding: 0 20px;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      flex-shrink: 0;
+    }
+
+    #chat-send:hover {
+      background: var(--gold);
+      color: var(--ink);
+    }
+
     /* ── Footer ── */
     footer {
       margin-top: 60px;
@@ -421,8 +623,12 @@
 <!-- Main game -->
 <div id="main">
 
-  <div style="display:flex;justify-content:flex-end;margin-bottom:-12px;">
+  <div class="top-buttons">
     <button class="btn btn-personaggi" onclick="togglePersonaggiPanel()">Personaggi</button>
+    <button class="btn btn-chat" onclick="openChat()" id="btn-chat">
+      Chat
+      <span id="chat-badge"></span>
+    </button>
   </div>
 
   <!-- Pannello personaggi -->
@@ -460,12 +666,31 @@
 
 <footer>One Word Story &mdash; gioco collaborativo</footer>
 
+<!-- Chat modal -->
+<div id="chat-overlay" onclick="handleOverlayClick(event)">
+  <div id="chat-modal">
+    <div id="chat-header">
+      <span id="chat-header-title">Chat dei narratori</span>
+      <button id="chat-close" onclick="closeChat()">✕</button>
+    </div>
+    <div id="chat-messages">
+      <span id="chat-empty">Nessun messaggio ancora… rompete il ghiaccio!</span>
+    </div>
+    <div id="chat-input-area">
+      <textarea id="chat-input" placeholder="scrivi un messaggio…" rows="1"></textarea>
+      <button id="chat-send" onclick="sendChat()">Invia</button>
+    </div>
+  </div>
+</div>
+
 <script src="/socket.io/socket.io.js"></script>
 <script>
   const socket = io();
   let myName = '';
   let currentTurn = '';
   let allWords = [];
+  let chatOpen = false;
+  let unreadCount = 0;
 
   function join() {
     const nameInput = document.getElementById('name');
@@ -504,7 +729,7 @@
     if (!trimmed) return false;
     if (trimmed.includes(' ')) return false;
     if (/[.!?,;:]$/.test(trimmed)) return true;
-    if (/^["«“‘']/.test(trimmed)) return true;
+    if (/^["«"'']/.test(trimmed)) return true;
     return false;
   }
 
@@ -515,7 +740,7 @@
     const parts = trimmed.split(' ');
     if (parts.length > 2) return false;
     if (parts.length === 2) {
-      const startsWithQuote = /^["«“‘']/.test(trimmed);
+      const startsWithQuote = /^["«"'']/.test(trimmed);
       const firstEndsPunct = /[.!?,;:]$/.test(parts[0]);
       if (!startsWithQuote && !firstEndsPunct) return false;
     }
@@ -532,7 +757,6 @@
     }
     socket.emit('word', word);
     wordInput.value = '';
-    // Disattiva modalità personaggio dopo l'invio
     if (personaggioMode) {
       personaggioMode = false;
       document.getElementById('btn-personaggio').classList.remove('active');
@@ -556,7 +780,6 @@
     const container = document.getElementById('story');
     const count = words.length;
 
-    // Build lines of 8 words each
     const lines = [];
     for (let i = 0; i < words.length; i += 8) {
       lines.push(words.slice(i, i + 8));
@@ -564,7 +787,6 @@
 
     let html = '';
     lines.forEach((line, li) => {
-      const isLastLine = li === lines.length - 1;
       const wordSpans = line.map((w, wi) => {
         const globalIdx = li * 8 + wi;
         const isNew = globalIdx === count - 1;
@@ -575,7 +797,6 @@
 
     container.innerHTML = html || '<span style="color:var(--muted);font-style:italic;font-size:16px">La storia non è ancora iniziata…</span>';
 
-    // Update word count
     document.getElementById('word-count').textContent =
       count === 0 ? '0 parole' : count === 1 ? '1 parola' : `${count} parole`;
   }
@@ -591,7 +812,6 @@
   }
 
   socket.on('story', words => renderStory(words));
-
   socket.on('turn', name => updateTurnUI(name));
 
   socket.on('players', players => {
@@ -625,7 +845,7 @@
     "Gianmarco Zagato",
     "Contadino",
     "Optimus Prime",
-    "l’Ape principessa (carinissima)",
+    "l'Ape principessa (carinissima)",
     "Tartarughina"
   ];
 
@@ -636,7 +856,6 @@
       panel.style.display = 'none';
       return;
     }
-    // Popola la lista
     const list = document.getElementById('personaggi-list');
     list.innerHTML = PERSONAGGI.map((p, i) =>
       `<span class="personaggio-tag" onclick="selectPersonaggio(${i})">${p}</span>`
@@ -646,7 +865,6 @@
 
   function selectPersonaggio(idx) {
     const nome = PERSONAGGI[idx];
-    // Attiva modalità personaggio e inserisce il nome nel campo
     personaggioMode = true;
     const btn = document.getElementById('btn-personaggio');
     btn.classList.add('active');
@@ -654,17 +872,100 @@
     wordInput.placeholder = 'scrivi la battuta del personaggio…';
     wordInput.value = nome;
     wordInput.focus();
-    // Porta il cursore alla fine
     wordInput.setSelectionRange(wordInput.value.length, wordInput.value.length);
-    // Chiudi il pannello
     document.getElementById('personaggi-panel').style.display = 'none';
   }
 
-  // Riconnessione automatica: se il socket si riconnette, rimanda il nome
-  socket.on('connect', () => {
-    if (myName) {
-      socket.emit('join', myName);
+  // ── Chat ──
+  function openChat() {
+    chatOpen = true;
+    document.getElementById('chat-overlay').classList.add('open');
+    unreadCount = 0;
+    updateBadge();
+    setTimeout(() => {
+      const msgs = document.getElementById('chat-messages');
+      msgs.scrollTop = msgs.scrollHeight;
+      document.getElementById('chat-input').focus();
+    }, 50);
+  }
+
+  function closeChat() {
+    chatOpen = false;
+    document.getElementById('chat-overlay').classList.remove('open');
+  }
+
+  function handleOverlayClick(e) {
+    if (e.target === document.getElementById('chat-overlay')) closeChat();
+  }
+
+  function updateBadge() {
+    const badge = document.getElementById('chat-badge');
+    if (unreadCount > 0 && !chatOpen) {
+      badge.textContent = unreadCount > 9 ? '9+' : unreadCount;
+      badge.classList.add('visible');
+    } else {
+      badge.classList.remove('visible');
     }
+  }
+
+  function sendChat() {
+    const input = document.getElementById('chat-input');
+    const text = input.value.trim();
+    if (!text || !myName) return;
+    socket.emit('chat', { name: myName, text });
+    input.value = '';
+    input.style.height = 'auto';
+    input.focus();
+  }
+
+  document.getElementById('chat-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendChat();
+    }
+  });
+
+  // Auto-resize textarea
+  document.getElementById('chat-input').addEventListener('input', function() {
+    this.style.height = 'auto';
+    this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+  });
+
+  socket.on('chat', ({ name, text, time }) => {
+    const msgs = document.getElementById('chat-messages');
+
+    // Rimuovi placeholder vuoto
+    const empty = document.getElementById('chat-empty');
+    if (empty) empty.remove();
+
+    const isMe = name === myName;
+    const timeStr = time ? new Date(time).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' }) : '';
+
+    const div = document.createElement('div');
+    div.className = 'chat-msg' + (isMe ? ' is-me' : '');
+    div.innerHTML = `
+      <div class="chat-msg-meta">
+        <span class="chat-name${isMe ? ' is-me' : ''}">${escapeHtml(name)}</span>
+        ${timeStr ? `<span style="margin-left:6px">${timeStr}</span>` : ''}
+      </div>
+      <div class="chat-msg-text">${escapeHtml(text)}</div>
+    `;
+    msgs.appendChild(div);
+    msgs.scrollTop = msgs.scrollHeight;
+
+    if (!chatOpen && !isMe) {
+      unreadCount++;
+      updateBadge();
+    }
+  });
+
+  function escapeHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // Riconnessione automatica
+  socket.on('connect', () => {
+    if (myName) socket.emit('join', myName);
   });
 
   // Enter per entrare
