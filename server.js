@@ -9,13 +9,14 @@ app.use(express.static("public"));
 let players = []; // { id, name, disconnected }
 let story = [];
 let turn = 0;
+let lastAuthor = ""; // nome di chi ha scritto l ultima parola
 const reconnectTimers = {}; // name -> setTimeout handle
 const RECONNECT_GRACE = 300000; // 5 minuti per tornare
 
 function broadcastState() {
   io.emit("players", players.map(p => ({ name: p.name, disconnected: p.disconnected })));
   io.emit("turn", players[turn]?.name);
-  io.emit("story", story);
+  io.emit("story", { words: story, lastAuthor });
 }
 
 io.on("connection", (socket) => {
@@ -37,12 +38,6 @@ io.on("connection", (socket) => {
 
     broadcastState();
   });
-  socket.on("chat", ({ name, text }) => {
-    if (!name || typeof text !== "string") return;
-    const clean = text.trim();
-    if (!clean) return;
-    io.emit("chat", { name, text: clean, time: Date.now() });
-  });
 
   socket.on("word", (word) => {
     if (players[turn]?.id !== socket.id) return;
@@ -52,6 +47,7 @@ io.on("connection", (socket) => {
     // Nessun limite sul numero di parole: la validazione è gestita dal client.
 
     story.push(clean);
+    lastAuthor = player?.name || "";
 
     // Salta i giocatori disconnessi per il turno successivo
     let next = (turn + 1) % players.length;
@@ -62,24 +58,27 @@ io.on("connection", (socket) => {
     }
     turn = next;
 
-    io.emit("story", story);
+    io.emit("story", { words: story, lastAuthor });
     io.emit("turn", players[turn]?.name);
   });
 
-  socket.on("skip", () => {
-    if (players[turn]?.id !== socket.id) return;
 
-    let next = (turn + 1) % players.length;
-    let attempts = 0;
-    while (players[next]?.disconnected && attempts < players.length) {
-      next = (next + 1) % players.length;
-      attempts++;
-    }
-    turn = next;
+  socket.on("undo", (name) => {
+    const player = players.find(p => p.id === socket.id);
+    if (!player || player.name !== name) return;
+    if (lastAuthor !== name) return;
+    if (story.length === 0) return;
 
+    story.pop();
+    lastAuthor = "";
+
+    // Torna il turno al giocatore che ha appena annullato
+    const idx = players.findIndex(p => p.name === name);
+    if (idx !== -1) turn = idx;
+
+    io.emit("story", { words: story, lastAuthor });
     io.emit("turn", players[turn]?.name);
   });
-
   socket.on("disconnect", () => {
     const player = players.find(p => p.id === socket.id);
     if (!player) return;
