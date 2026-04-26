@@ -66,6 +66,20 @@ io.on("connection", (socket) => {
     io.emit("turn", players[turn]?.name);
   });
 
+  socket.on("skip", () => {
+    if (players[turn]?.id !== socket.id) return;
+
+    let next = (turn + 1) % players.length;
+    let attempts = 0;
+    while (players[next]?.disconnected && attempts < players.length) {
+      next = (next + 1) % players.length;
+      attempts++;
+    }
+    turn = next;
+
+    io.emit("turn", players[turn]?.name);
+  });
+
   socket.on("disconnect", () => {
     const player = players.find(p => p.id === socket.id);
     if (!player) return;
