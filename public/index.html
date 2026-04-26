@@ -393,6 +393,16 @@
 
     #chat-send:hover { background: var(--gold); color: var(--ink); }
 
+    /* ── Annulla button ── */
+    .btn-annulla {
+      font-size: 11px; padding: 8px 16px;
+      background: transparent; color: var(--rust); border-color: var(--rust);
+      letter-spacing: 0.15em; opacity: 0;
+      pointer-events: none; transition: opacity 0.2s, background 0.15s, color 0.15s;
+    }
+    .btn-annulla.visible { opacity: 1; pointer-events: auto; }
+    .btn-annulla:hover { background: var(--rust); color: var(--paper); border-color: var(--rust); }
+
     /* ── Footer ── */
     footer {
       margin-top: 60px; font-size: 10px; letter-spacing: 0.15em;
@@ -457,6 +467,7 @@
   </div>
 
   <div id="word-area">
+    <button class="btn btn-annulla" id="btn-annulla" onclick="annullaParola()" title="Elimina l’ultima parola">← Annulla</button>
     <button class="btn btn-personaggio" id="btn-personaggio" onclick="togglePersonaggio()">Nuovo personaggio</button>
     <input id="word" placeholder="la tua parola…" autocomplete="off" />
     <button class="btn btn-ghost" onclick="sendWord()">Invia</button>
@@ -474,7 +485,7 @@
       <button id="chat-close" onclick="closeChat()">✕</button>
     </div>
     <div id="chat-messages">
-      <span id="chat-empty">Nessun messaggio ancora </span>
+      <span id="chat-empty">Nessun messaggio ancora… rompete il ghiaccio!</span>
     </div>
     <div id="chat-input-area">
       <textarea id="chat-input" placeholder="scrivi un messaggio…" rows="1"></textarea>
@@ -491,6 +502,7 @@
   let allWords = [];
   let chatOpen = false;
   let unreadCount = 0;
+  let lastAuthor = "";
 
   function join() {
     const nameInput = document.getElementById('name');
@@ -574,7 +586,7 @@
     if (e.key === 'Enter') sendWord();
   });
 
-  function renderStory(words) {
+  function renderStory(words, author) {
     allWords = words;
     const container = document.getElementById('story');
     const count = words.length;
@@ -594,6 +606,10 @@
     container.innerHTML = html || '<span style="color:var(--muted);font-style:italic;font-size:16px">La storia non è ancora iniziata…</span>';
     document.getElementById('word-count').textContent =
       count === 0 ? '0 parole' : count === 1 ? '1 parola' : `${count} parole`;
+    lastAuthor = author || '';
+    const btnAnn = document.getElementById('btn-annulla');
+    if (myName && lastAuthor === myName && count > 0) btnAnn.classList.add('visible');
+    else btnAnn.classList.remove('visible');
   }
 
   function updateTurnUI(name) {
@@ -613,7 +629,15 @@
     socket.emit('skip');
   }
 
-  socket.on('story', words => renderStory(words));
+  function annullaParola() {
+    if (!myName || lastAuthor !== myName) return;
+    socket.emit('undo', myName);
+  }
+
+  socket.on('story', data => {
+    if (Array.isArray(data)) renderStory(data, '');
+    else renderStory(data.words, data.lastAuthor);
+  });
   socket.on('turn', name => updateTurnUI(name));
 
   socket.on('players', players => {
