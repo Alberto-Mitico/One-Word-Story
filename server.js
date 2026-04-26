@@ -6,25 +6,38 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.static("public"));
 
-let players = []; // { id, name, disconnected }
+let players = [];   // { id, name, disconnected }
 let story = [];
 let turn = 0;
-const reconnectTimers = {}; // name -> setTimeout handle
-const RECONNECT_GRACE = 300000; // 5 minuti per tornare
+let lastAuthor = ""; // nome di chi ha scritto l'ultima parola
 
+const reconnectTimers = {};
+const RECONNECT_GRACE = 300000; // 5 minuti
+
+// Invia lo stato completo a tutti
 function broadcastState() {
   io.emit("players", players.map(p => ({ name: p.name, disconnected: p.disconnected })));
   io.emit("turn", players[turn]?.name);
-  io.emit("story", story);
+  io.emit("story", { words: story, lastAuthor });
+}
+
+// Avanza il turno saltando i disconnessi
+function advanceTurn() {
+  let next = (turn + 1) % players.length;
+  let attempts = 0;
+  while (players[next]?.disconnected && attempts < players.length) {
+    next = (next + 1) % players.length;
+    attempts++;
+  }
+  turn = next;
 }
 
 io.on("connection", (socket) => {
 
+  // ── Entrata in partita ──
   socket.on("join", (name) => {
-    // Controlla se è una riconnessione
     const existing = players.find(p => p.name === name);
     if (existing) {
-      // Cancella il timer di rimozione se c'era
       if (reconnectTimers[name]) {
         clearTimeout(reconnectTimers[name]);
         delete reconnectTimers[name];
@@ -34,10 +47,10 @@ io.on("connection", (socket) => {
     } else {
       players.push({ id: socket.id, name, disconnected: false });
     }
-
     broadcastState();
   });
 
+  // ── Chat libera ──
   socket.on("chat", ({ name, text }) => {
     if (!name || typeof text !== "string") return;
     const clean = text.trim();
@@ -45,49 +58,53 @@ io.on("connection", (socket) => {
     io.emit("chat", { name, text: clean, time: Date.now() });
   });
 
-
-
+  // ── Invio parola ──
   socket.on("word", (word) => {
     if (players[turn]?.id !== socket.id) return;
     if (typeof word !== "string") return;
     const clean = word.trim();
     if (!clean) return;
-    // Nessun limite sul numero di parole: la validazione è gestita dal client.
 
+    const player = players[turn];
     story.push(clean);
+    lastAuthor = player.name;
 
-    // Salta i giocatori disconnessi per il turno successivo
-    let next = (turn + 1) % players.length;
-    let attempts = 0;
-    while (players[next]?.disconnected && attempts < players.length) {
-      next = (next + 1) % players.length;
-      attempts++;
-    }
-    turn = next;
+    advanceTurn();
 
-    io.emit("story", story);
+    io.emit("story", { words: story, lastAuthor });
     io.emit("turn", players[turn]?.name);
   });
 
+  // ── Salta turno ──
   socket.on("skip", () => {
     if (players[turn]?.id !== socket.id) return;
-
-    let next = (turn + 1) % players.length;
-   let attempts = 0;
-    while (players[next]?.disconnected && attempts < players.length) {
-     next = (next + 1) % players.length;
-     attempts++;
-    }
-    turn = next;
-
+    advanceTurn();
     io.emit("turn", players[turn]?.name);
   });
 
+  // ── Annulla ultima parola ──
+  socket.on("undo", (name) => {
+    const player = players.find(p => p.id === socket.id);
+    if (!player || player.name !== name) return;
+    if (lastAuthor !== name) return;
+    if (story.length === 0) return;
+
+    story.pop();
+    lastAuthor = "";
+
+    // Ridà il turno a chi ha annullato
+    const idx = players.findIndex(p => p.name === name);
+    if (idx !== -1) turn = idx;
+
+    io.emit("story", { words: story, lastAuthor });
+    io.emit("turn", players[turn]?.name);
+  });
+
+  // ── Disconnessione ──
   socket.on("disconnect", () => {
     const player = players.find(p => p.id === socket.id);
     if (!player) return;
 
-    // Segna come disconnesso ma non rimuovere subito
     player.disconnected = true;
     io.emit("players", players.map(p => ({ name: p.name, disconnected: p.disconnected })));
 
@@ -105,7 +122,7 @@ io.on("connection", (socket) => {
       }
     }
 
-    // Dopo 15 secondi, se non è tornato, lo rimuoviamo davvero
+    // Dopo il grace period, rimuove definitivamente
     reconnectTimers[player.name] = setTimeout(() => {
       const idx = players.findIndex(p => p.name === player.name);
       if (idx === -1) return;
@@ -116,9 +133,7 @@ io.on("connection", (socket) => {
       if (players.length === 0) {
         turn = 0;
       } else {
-        if (idx <= turn) {
-          turn = Math.max(0, turn - 1);
-        }
+        if (idx <= turn) turn = Math.max(0, turn - 1);
         turn = turn % players.length;
         let attempts = 0;
         while (players[turn]?.disconnected && attempts < players.length) {
