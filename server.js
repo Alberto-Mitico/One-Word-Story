@@ -37,6 +37,12 @@ io.on("connection", (socket) => {
 
     broadcastState();
   });
+  socket.on("chat", ({ name, text }) => {
+    if (!name || typeof text !== "string") return;
+    const clean = text.trim();
+    if (!clean) return;
+    io.emit("chat", { name, text: clean, time: Date.now() });
+  });
 
   socket.on("word", (word) => {
     if (players[turn]?.id !== socket.id) return;
