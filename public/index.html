@@ -13,7 +13,6 @@
       --paper: #f5f0e8;
       --cream: #ede6d3;
       --gold: #c8952a;
-      --gold-light: #e8b84b;
       --rust: #8b3a1e;
       --muted: #8a7d68;
       --shadow: rgba(26,18,8,0.15);
@@ -71,7 +70,6 @@
     }
 
     .eyebrow {
-      font-family: 'DM Mono', monospace;
       font-size: 11px;
       letter-spacing: 0.25em;
       text-transform: uppercase;
@@ -227,7 +225,7 @@
     #story .word-new { color: var(--gold); animation: popWord 0.4s ease both; }
 
     /* ── Word input ── */
-    #word-area { display: flex; gap: 12px; align-items: stretch; }
+    #word-area { display: flex; gap: 12px; align-items: stretch; flex-wrap: wrap; }
 
     #word {
       flex: 1;
@@ -235,6 +233,7 @@
       background: var(--cream); border: 2px solid var(--ink);
       padding: 14px 18px; outline: none; color: var(--ink);
       transition: border-color 0.2s, box-shadow 0.2s; border-radius: 1px;
+      min-width: 160px;
     }
 
     #word:focus { border-color: var(--gold); box-shadow: 3px 3px 0 var(--gold); }
@@ -249,9 +248,7 @@
       from { opacity: 0; transform: translateY(16px); }
       to   { opacity: 1; transform: translateY(0); }
     }
-
     @keyframes fadeWord { from { opacity: 0; } to { opacity: 1; } }
-
     @keyframes popWord {
       0%   { opacity: 0; transform: scale(0.8); color: var(--gold); }
       60%  { transform: scale(1.05); }
@@ -261,41 +258,40 @@
     /* ── Top buttons ── */
     .top-buttons { display: flex; justify-content: flex-end; gap: 8px; margin-bottom: -12px; }
 
+    /* Bottoni piccoli della barra superiore */
+    .btn-sm {
+      font-size: 11px; padding: 8px 16px;
+      background: transparent; letter-spacing: 0.15em;
+    }
+
     .btn-salta {
-      font-size: 11px; padding: 8px 18px;
-      background: transparent; color: var(--muted); border-color: var(--muted);
-      letter-spacing: 0.15em;
+      color: var(--muted); border-color: var(--muted);
     }
-
-    .btn-salta:hover:not(:disabled) {
-      background: var(--muted); color: var(--paper); border-color: var(--muted);
-    }
-
+    .btn-salta:hover:not(:disabled) { background: var(--muted); color: var(--paper); border-color: var(--muted); }
     .btn-salta:disabled { opacity: 0.3; cursor: not-allowed; }
 
-    .btn-personaggi {
-      font-size: 11px; padding: 8px 18px;
-      background: transparent; color: var(--rust); border-color: var(--rust);
-      letter-spacing: 0.15em;
-    }
-
+    .btn-personaggi { color: var(--rust); border-color: var(--rust); }
     .btn-personaggi:hover { background: var(--rust); color: var(--paper); border-color: var(--rust); }
 
-    .btn-chat {
-      font-size: 11px; padding: 8px 18px;
-      background: transparent; color: var(--ink); border-color: var(--ink);
-      letter-spacing: 0.15em; position: relative;
-    }
-
+    .btn-chat { color: var(--ink); border-color: var(--ink); position: relative; }
     .btn-chat:hover { background: var(--ink); color: var(--paper); }
 
+    /* Badge messaggi non letti */
     #chat-badge {
       display: none; position: absolute; top: -6px; right: -6px;
       width: 16px; height: 16px; background: var(--rust); color: var(--paper);
       font-size: 9px; border-radius: 50%; align-items: center; justify-content: center;
     }
-
     #chat-badge.visible { display: flex; }
+
+    /* ── Annulla ── */
+    .btn-annulla {
+      color: var(--rust); border-color: var(--rust);
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.2s, background 0.15s, color 0.15s;
+    }
+    .btn-annulla.visible { opacity: 1; pointer-events: auto; }
+    .btn-annulla:hover { background: var(--rust); color: var(--paper); border-color: var(--rust); }
 
     /* ── Personaggi panel ── */
     #personaggi-panel {
@@ -314,9 +310,9 @@
     .personaggio-tag {
       font-family: 'Playfair Display', serif; font-size: 13px; font-style: italic;
       padding: 6px 14px; border: 1.5px solid var(--ink); background: #fff;
-      cursor: pointer; border-radius: 2px; transition: background 0.15s, color 0.15s, transform 0.1s;
+      cursor: pointer; border-radius: 2px;
+      transition: background 0.15s, color 0.15s, transform 0.1s;
     }
-
     .personaggio-tag:hover { background: var(--ink); color: var(--paper); transform: translateY(-1px); }
 
     /* ── Chat modal ── */
@@ -325,7 +321,6 @@
       background: rgba(26,18,8,0.45); z-index: 100;
       align-items: flex-end; justify-content: center; padding: 20px;
     }
-
     #chat-overlay.open { display: flex; }
 
     #chat-modal {
@@ -346,7 +341,6 @@
       background: none; border: none; cursor: pointer;
       font-size: 18px; color: var(--ink); line-height: 1; padding: 0 4px;
     }
-
     #chat-close:hover { color: var(--rust); }
 
     #chat-messages {
@@ -364,7 +358,6 @@
       color: var(--ink); background: var(--cream);
       border-left: 3px solid var(--gold); padding: 8px 12px; border-radius: 0 2px 2px 0;
     }
-
     .chat-msg.is-me .chat-msg-text { border-left-color: var(--rust); background: #fff; }
 
     #chat-empty {
@@ -379,7 +372,6 @@
       background: var(--cream); border: none; padding: 14px 16px; outline: none;
       color: var(--ink); resize: none; min-height: 52px; max-height: 120px;
     }
-
     #chat-input::placeholder { color: var(--muted); opacity: 0.6; }
 
     #chat-send {
@@ -390,18 +382,7 @@
       padding: 0 20px; cursor: pointer; flex-shrink: 0;
       transition: background 0.15s, color 0.15s;
     }
-
     #chat-send:hover { background: var(--gold); color: var(--ink); }
-
-    /* ── Annulla button ── */
-    .btn-annulla {
-      font-size: 11px; padding: 8px 16px;
-      background: transparent; color: var(--rust); border-color: var(--rust);
-      letter-spacing: 0.15em; opacity: 0;
-      pointer-events: none; transition: opacity 0.2s, background 0.15s, color 0.15s;
-    }
-    .btn-annulla.visible { opacity: 1; pointer-events: auto; }
-    .btn-annulla:hover { background: var(--rust); color: var(--paper); border-color: var(--rust); }
 
     /* ── Footer ── */
     footer {
@@ -434,9 +415,9 @@
 <div id="main">
 
   <div class="top-buttons">
-    <button class="btn btn-salta" id="btn-salta" onclick="saltaTurno()" disabled>Salta</button>
-    <button class="btn btn-personaggi" onclick="togglePersonaggiPanel()">Personaggi</button>
-    <button class="btn btn-chat" onclick="openChat()" id="btn-chat">
+    <button class="btn btn-sm btn-salta" id="btn-salta" onclick="saltaTurno()" disabled>Salta</button>
+    <button class="btn btn-sm btn-personaggi" onclick="togglePersonaggiPanel()">Personaggi</button>
+    <button class="btn btn-sm btn-chat" onclick="openChat()" id="btn-chat">
       Chat
       <span id="chat-badge"></span>
     </button>
@@ -467,7 +448,7 @@
   </div>
 
   <div id="word-area">
-    <button class="btn btn-annulla" id="btn-annulla" onclick="annullaParola()" title="Elimina l’ultima parola">← Annulla</button>
+    <button class="btn btn-sm btn-annulla" id="btn-annulla" onclick="annullaParola()" title="Elimina l'ultima parola che hai scritto">← Annulla</button>
     <button class="btn btn-personaggio" id="btn-personaggio" onclick="togglePersonaggio()">Nuovo personaggio</button>
     <input id="word" placeholder="la tua parola…" autocomplete="off" />
     <button class="btn btn-ghost" onclick="sendWord()">Invia</button>
@@ -497,13 +478,15 @@
 <script src="/socket.io/socket.io.js"></script>
 <script>
   const socket = io();
-  let myName = '';
-  let currentTurn = '';
-  let allWords = [];
-  let chatOpen = false;
-  let unreadCount = 0;
-  let lastAuthor = "";
 
+  let myName      = '';
+  let currentTurn = '';
+  let lastAuthor  = '';
+  let allWords    = [];
+  let chatOpen    = false;
+  let unreadCount = 0;
+
+  // ── Entrata ──
   function join() {
     const nameInput = document.getElementById('name');
     myName = nameInput.value.trim();
@@ -513,17 +496,95 @@
     document.getElementById('main').classList.add('visible');
   }
 
+  document.getElementById('name').addEventListener('keydown', e => {
+    if (e.key === 'Enter') join();
+  });
+
+  socket.on('connect', () => {
+    if (myName) socket.emit('join', myName);
+  });
+
+  // ── Errore temporaneo ──
   function showError(msg) {
     const el = document.getElementById('word-error');
     el.textContent = msg;
     setTimeout(() => { el.textContent = ''; }, 2000);
   }
 
+  // ── Story ──
+  socket.on('story', data => {
+    // Supporta sia array (legacy) che oggetto {words, lastAuthor}
+    if (Array.isArray(data)) {
+      renderStory(data, '');
+    } else {
+      renderStory(data.words, data.lastAuthor);
+    }
+  });
+
+  function renderStory(words, author) {
+    allWords   = words || [];
+    lastAuthor = author || '';
+    const count = allWords.length;
+
+    const lines = [];
+    for (let i = 0; i < allWords.length; i += 8) lines.push(allWords.slice(i, i + 8));
+
+    let html = '';
+    lines.forEach((line, li) => {
+      const spans = line.map((w, wi) => {
+        const idx = li * 8 + wi;
+        return `<span class="${idx === count - 1 ? 'word-new' : ''}">${w}</span>`;
+      }).join(' ');
+      html += `<span class="story-line">${spans}</span>\n`;
+    });
+
+    document.getElementById('story').innerHTML =
+      html || '<span style="color:var(--muted);font-style:italic;font-size:16px">La storia non è ancora iniziata…</span>';
+
+    document.getElementById('word-count').textContent =
+      count === 0 ? '0 parole' : count === 1 ? '1 parola' : `${count} parole`;
+
+    // Mostra Annulla solo se sono io l'ultimo autore
+    const btnAnn = document.getElementById('btn-annulla');
+    if (myName && lastAuthor === myName && count > 0) {
+      btnAnn.classList.add('visible');
+    } else {
+      btnAnn.classList.remove('visible');
+    }
+  }
+
+  // ── Turno ──
+  socket.on('turn', name => updateTurnUI(name));
+
+  function updateTurnUI(name) {
+    currentTurn = name;
+    document.getElementById('turn-name').textContent = name || '—';
+    const wordInput = document.getElementById('word');
+    const btnSalta  = document.getElementById('btn-salta');
+    const isMyTurn  = !!(myName && name === myName);
+    wordInput.disabled = !isMyTurn;
+    wordInput.placeholder = isMyTurn ? 'la tua parola…' : `aspetta il turno di ${name}…`;
+    btnSalta.disabled = !isMyTurn;
+    if (isMyTurn) wordInput.focus();
+  }
+
+  // ── Giocatori ──
+  socket.on('players', players => {
+    const list = document.getElementById('players-list');
+    list.innerHTML = players.map(p => {
+      const name   = typeof p === 'object' ? p.name : p;
+      const away   = typeof p === 'object' ? p.disconnected : false;
+      const active = name === currentTurn;
+      return `<span class="player-tag ${active ? 'active' : ''} ${away ? 'away' : ''}">${name}${away ? ' ↻' : ''}</span>`;
+    }).join('');
+  });
+
+  // ── Invia parola ──
   let personaggioMode = false;
 
   function togglePersonaggio() {
     personaggioMode = !personaggioMode;
-    const btn = document.getElementById('btn-personaggio');
+    const btn       = document.getElementById('btn-personaggio');
     const wordInput = document.getElementById('word');
     if (personaggioMode) {
       btn.classList.add('active');
@@ -552,8 +613,8 @@
     const parts = trimmed.split(' ');
     if (parts.length > 2) return false;
     if (parts.length === 2) {
-      const startsWithQuote = /^["«"'']/.test(trimmed);
-      const firstEndsPunct = /[.!?,;:]$/.test(parts[0]);
+      const startsWithQuote  = /^["«"'']/.test(trimmed);
+      const firstEndsPunct   = /[.!?,;:]$/.test(parts[0]);
       if (!startsWithQuote && !firstEndsPunct) return false;
     }
     return true;
@@ -586,69 +647,17 @@
     if (e.key === 'Enter') sendWord();
   });
 
-  function renderStory(words, author) {
-    allWords = words;
-    const container = document.getElementById('story');
-    const count = words.length;
-    const lines = [];
-    for (let i = 0; i < words.length; i += 8) lines.push(words.slice(i, i + 8));
-
-    let html = '';
-    lines.forEach((line, li) => {
-      const wordSpans = line.map((w, wi) => {
-        const globalIdx = li * 8 + wi;
-        const isNew = globalIdx === count - 1;
-        return `<span class="${isNew ? 'word-new' : ''}">${w}</span>`;
-      }).join(' ');
-      html += `<span class="story-line">${wordSpans}</span>\n`;
-    });
-
-    container.innerHTML = html || '<span style="color:var(--muted);font-style:italic;font-size:16px">La storia non è ancora iniziata…</span>';
-    document.getElementById('word-count').textContent =
-      count === 0 ? '0 parole' : count === 1 ? '1 parola' : `${count} parole`;
-    lastAuthor = author || '';
-    const btnAnn = document.getElementById('btn-annulla');
-    if (myName && lastAuthor === myName && count > 0) btnAnn.classList.add('visible');
-    else btnAnn.classList.remove('visible');
-  }
-
-  function updateTurnUI(name) {
-    currentTurn = name;
-    document.getElementById('turn-name').textContent = name || '—';
-    const wordInput = document.getElementById('word');
-    const btnSalta = document.getElementById('btn-salta');
-    const isMyTurn = myName && name === myName;
-    wordInput.disabled = !isMyTurn;
-    wordInput.placeholder = isMyTurn ? 'la tua parola…' : `aspetta il turno di ${name}…`;
-    btnSalta.disabled = !isMyTurn;
-    if (isMyTurn) wordInput.focus();
-  }
-
+  // ── Salta ──
   function saltaTurno() {
     if (!myName || currentTurn !== myName) return;
     socket.emit('skip');
   }
 
+  // ── Annulla ultima parola ──
   function annullaParola() {
     if (!myName || lastAuthor !== myName) return;
     socket.emit('undo', myName);
   }
-
-  socket.on('story', data => {
-    if (Array.isArray(data)) renderStory(data, '');
-    else renderStory(data.words, data.lastAuthor);
-  });
-  socket.on('turn', name => updateTurnUI(name));
-
-  socket.on('players', players => {
-    const list = document.getElementById('players-list');
-    list.innerHTML = players.map(p => {
-      const name = typeof p === 'object' ? p.name : p;
-      const away = typeof p === 'object' ? p.disconnected : false;
-      const active = name === currentTurn;
-      return `<span class="player-tag ${active ? 'active' : ''} ${away ? 'away' : ''}">${name}${away ? ' ↻' : ''}</span>`;
-    }).join('');
-  });
 
   // ── Personaggi ──
   const PERSONAGGI = [
@@ -712,7 +721,7 @@
 
   function sendChat() {
     const input = document.getElementById('chat-input');
-    const text = input.value.trim();
+    const text  = input.value.trim();
     if (!text || !myName) return;
     socket.emit('chat', { name: myName, text });
     input.value = '';
@@ -730,11 +739,13 @@
   });
 
   socket.on('chat', ({ name, text, time }) => {
-    const msgs = document.getElementById('chat-messages');
+    const msgs  = document.getElementById('chat-messages');
     const empty = document.getElementById('chat-empty');
     if (empty) empty.remove();
-    const isMe = name === myName;
-    const timeStr = time ? new Date(time).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' }) : '';
+    const isMe    = name === myName;
+    const timeStr = time
+      ? new Date(time).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })
+      : '';
     const div = document.createElement('div');
     div.className = 'chat-msg' + (isMe ? ' is-me' : '');
     div.innerHTML = `
@@ -749,11 +760,12 @@
   });
 
   function escapeHtml(str) {
-    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
   }
-
-  socket.on('connect', () => { if (myName) socket.emit('join', myName); });
-  document.getElementById('name').addEventListener('keydown', e => { if (e.key === 'Enter') join(); });
 </script>
 
 </body>
