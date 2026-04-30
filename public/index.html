@@ -554,29 +554,49 @@
   }
 
   // ── Turno ──
+  let currentPlayers = []; // cache per sapere chi è disconnesso
+
   socket.on('turn', name => updateTurnUI(name));
 
   function updateTurnUI(name) {
     currentTurn = name;
-    document.getElementById('turn-name').textContent = name || '—';
+    const isMyTurn       = !!(myName && name === myName);
+    const isDisconnected = currentPlayers.find(p => p.name === name)?.disconnected || false;
+
+    const turnNameEl = document.getElementById('turn-name');
+    turnNameEl.textContent = name || '—';
+
+    const banner = document.getElementById('turn-banner');
+    if (isDisconnected && !isMyTurn) {
+      banner.style.borderLeftColor = 'var(--muted)';
+      turnNameEl.style.color = 'var(--muted)';
+    } else {
+      banner.style.borderLeftColor = 'var(--gold)';
+      turnNameEl.style.color = 'var(--gold)';
+    }
+
     const wordInput = document.getElementById('word');
     const btnSalta  = document.getElementById('btn-salta');
-    const isMyTurn  = !!(myName && name === myName);
     wordInput.disabled = !isMyTurn;
-    wordInput.placeholder = isMyTurn ? 'la tua parola…' : `aspetta il turno di ${name}…`;
+    wordInput.placeholder = isMyTurn
+      ? 'la tua parola…'
+      : isDisconnected
+        ? `${name} si è disconnesso, in attesa che ritorni…`
+        : `aspetta il turno di ${name}…`;
     btnSalta.disabled = !isMyTurn;
     if (isMyTurn) wordInput.focus();
   }
 
   // ── Giocatori ──
   socket.on('players', players => {
+    currentPlayers = players.map(p => typeof p === 'object' ? p : { name: p, disconnected: false });
     const list = document.getElementById('players-list');
-    list.innerHTML = players.map(p => {
-      const name   = typeof p === 'object' ? p.name : p;
-      const away   = typeof p === 'object' ? p.disconnected : false;
-      const active = name === currentTurn;
-      return `<span class="player-tag ${active ? 'active' : ''} ${away ? 'away' : ''}">${name}${away ? ' ↻' : ''}</span>`;
+    list.innerHTML = currentPlayers.map(p => {
+      const active = p.name === currentTurn;
+      return `<span class="player-tag ${active ? 'active' : ''} ${p.disconnected ? 'away' : ''}">${p.name}${p.disconnected ? ' ↻' : ''}</span>`;
     }).join('');
+    // Aggiorna il banner se lo stato disconnessione del giocatore corrente è cambiato
+    if (currentTurn) updateTurnUI(currentTurn);
   });
 
   // ── Invia parola ──
