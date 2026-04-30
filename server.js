@@ -108,19 +108,8 @@ io.on("connection", (socket) => {
     player.disconnected = true;
     io.emit("players", players.map(p => ({ name: p.name, disconnected: p.disconnected })));
 
-    // Se era il suo turno, passa al prossimo attivo
-    if (players[turn]?.id === socket.id) {
-      let next = (turn + 1) % players.length;
-      let attempts = 0;
-      while (players[next]?.disconnected && attempts < players.length) {
-        next = (next + 1) % players.length;
-        attempts++;
-      }
-      if (!players[next]?.disconnected) {
-        turn = next;
-        io.emit("turn", players[turn]?.name);
-      }
-    }
+    // Il turno rimane sul giocatore disconnesso: si aspetta che si riconnetta.
+    // Il banner mostrerà il suo nome con l'icona ↻ finché non torna (o scade il grace period).
 
     // Dopo il grace period, rimuove definitivamente
     reconnectTimers[player.name] = setTimeout(() => {
