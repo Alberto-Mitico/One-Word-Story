@@ -400,7 +400,7 @@
 
 <header>
   <p class="eyebrow">Un racconto collettivo</p>
-  <h1>One <em>Word</em> Story</h1>
+  <h1>One <em id="word-easter-egg" ondblclick="playEasterEgg()" title="">Word</em> Story</h1>
   <p class="subtitle">Una parola alla volta · Un'storia insieme</p>
 </header>
 
@@ -786,6 +786,22 @@
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;');
+  }
+</script>
+
+<!-- Easter egg audio -->
+<audio id="easter-egg-audio" src="_One-Word-Story__AUDIO-2026-05-04-14-57-47.mp3" preload="auto"></audio>
+
+<script>
+  function playEasterEgg() {
+    const audio = document.getElementById('easter-egg-audio');
+    audio.currentTime = 0;
+    audio.play();
+
+    const el = document.getElementById('word-easter-egg');
+    el.style.transition = 'transform 0.15s ease, color 0.15s ease';
+    el.style.transform = 'scale(1.18)';
+    setTimeout(() => { el.style.transform = 'scale(1)'; }, 300);
   }
 </script>
 
