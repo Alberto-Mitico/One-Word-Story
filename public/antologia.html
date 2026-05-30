@@ -220,6 +220,131 @@
       color: var(--muted);
       opacity: 0.6;
     }
+
+    /* ── Password Gate ── */
+    #password-gate {
+      position: fixed;
+      inset: 0;
+      background: var(--paper);
+      background-image:
+        radial-gradient(ellipse at 20% 10%, rgba(200,149,42,0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 90%, rgba(139,58,30,0.06) 0%, transparent 50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      padding: 24px;
+    }
+
+    .gate-box {
+      border: 2px solid var(--ink);
+      background: #fff;
+      box-shadow: 6px 6px 0 var(--shadow);
+      padding: 48px 40px 40px;
+      max-width: 380px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 28px;
+    }
+
+    .gate-eyebrow {
+      font-size: 10px;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--gold);
+    }
+
+    .gate-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 28px;
+      font-style: italic;
+      font-weight: 700;
+      text-align: center;
+      color: var(--ink);
+      line-height: 1.2;
+    }
+
+    .gate-hint {
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .pin-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .pin-digit {
+      width: 44px;
+      height: 56px;
+      border: 2px solid var(--ink);
+      background: var(--cream);
+      font-family: 'DM Mono', monospace;
+      font-size: 22px;
+      text-align: center;
+      color: var(--ink);
+      outline: none;
+      transition: border-color 0.15s, background 0.15s;
+      caret-color: transparent;
+    }
+
+    .pin-digit:focus {
+      border-color: var(--gold);
+      background: #fff;
+    }
+
+    .pin-digit.filled {
+      background: var(--cream);
+    }
+
+    .gate-btn {
+      width: 100%;
+      padding: 14px;
+      background: var(--ink);
+      color: var(--paper);
+      border: none;
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+    }
+
+    .gate-btn:hover { background: var(--rust); }
+    .gate-btn:active { transform: translateY(1px); }
+
+    .gate-error {
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      color: var(--rust);
+      text-align: center;
+      min-height: 16px;
+      transition: opacity 0.2s;
+    }
+
+    .gate-error.hidden { opacity: 0; }
+
+    /* shake animation on wrong password */
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      20%      { transform: translateX(-8px); }
+      40%      { transform: translateX(8px); }
+      60%      { transform: translateX(-6px); }
+      80%      { transform: translateX(6px); }
+    }
+
+    .shake { animation: shake 0.4s ease; }
+
+    /* hide main content until unlocked */
+    body.locked > *:not(#password-gate) {
+      visibility: hidden;
+    }
   </style>
 </head>
 <body>
@@ -375,6 +500,93 @@
 </div>
 
 <footer>One Word Story &mdash; antologia dei racconti</footer>
+
+<!-- ── Password Gate ── -->
+<div id="password-gate">
+  <div class="gate-box" id="gate-box">
+    <p class="gate-eyebrow">Accesso riservato</p>
+    <h2 class="gate-title">Antologia</h2>
+    <p class="gate-hint">Inserisci il codice a 6 cifre per continuare</p>
+    <div class="pin-row" id="pin-row">
+      <input class="pin-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off" data-index="0">
+      <input class="pin-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off" data-index="1">
+      <input class="pin-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off" data-index="2">
+      <input class="pin-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off" data-index="3">
+      <input class="pin-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off" data-index="4">
+      <input class="pin-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off" data-index="5">
+    </div>
+    <p class="gate-error hidden" id="gate-error">Codice errato. Riprova.</p>
+    <button class="gate-btn" id="gate-btn">Entra</button>
+  </div>
+</div>
+
+<script>
+  (function () {
+    const CORRECT = "202526";
+    const gate    = document.getElementById("password-gate");
+    const gateBox = document.getElementById("gate-box");
+    const errMsg  = document.getElementById("gate-error");
+    const btn     = document.getElementById("gate-btn");
+    const digits  = Array.from(document.querySelectorAll(".pin-digit"));
+
+    document.body.classList.add("locked");
+    digits[0].focus();
+
+    digits.forEach((el, i) => {
+      el.addEventListener("input", () => {
+        el.value = el.value.replace(/\D/g, "").slice(-1);
+        if (el.value) {
+          el.classList.add("filled");
+          if (i < 5) digits[i + 1].focus();
+          else btn.focus();
+        } else {
+          el.classList.remove("filled");
+        }
+        hideError();
+      });
+
+      el.addEventListener("keydown", (e) => {
+        if (e.key === "Backspace" && !el.value && i > 0) {
+          digits[i - 1].value = "";
+          digits[i - 1].classList.remove("filled");
+          digits[i - 1].focus();
+        }
+        if (e.key === "Enter") unlock();
+      });
+
+      el.addEventListener("paste", (e) => {
+        e.preventDefault();
+        const text = (e.clipboardData || window.clipboardData).getData("text").replace(/\D/g, "").slice(0, 6);
+        text.split("").forEach((ch, j) => {
+          if (digits[j]) { digits[j].value = ch; digits[j].classList.add("filled"); }
+        });
+        const next = Math.min(text.length, 5);
+        digits[next].focus();
+      });
+    });
+
+    btn.addEventListener("click", unlock);
+
+    function getCode() { return digits.map(d => d.value).join(""); }
+
+    function unlock() {
+      if (getCode() === CORRECT) {
+        gate.style.transition = "opacity 0.35s ease";
+        gate.style.opacity = "0";
+        setTimeout(() => { gate.remove(); document.body.classList.remove("locked"); }, 350);
+      } else {
+        errMsg.classList.remove("hidden");
+        gateBox.classList.remove("shake");
+        void gateBox.offsetWidth;
+        gateBox.classList.add("shake");
+        digits.forEach(d => { d.value = ""; d.classList.remove("filled"); });
+        digits[0].focus();
+      }
+    }
+
+    function hideError() { errMsg.classList.add("hidden"); }
+  })();
+</script>
 
 </body>
 </html>
