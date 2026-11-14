@@ -111,6 +111,8 @@
       color: var(--muted);
     }
 
+    .tag { font-size: 14px; }
+
     .meta { text-align: center; font-size: 10px; letter-spacing: 0.15em; opacity: 0.8; }
 
     #question {
@@ -257,7 +259,7 @@ function render(options, pos, total) {
   box.replaceChildren();
   box.style.setProperty('--n', options.length);
   box.className = options.length === 1 ? 'single' : '';
-  document.getElementById('tag').textContent = options.length === 1 ? 'Scelta del giorno' : 'Preferiresti…';
+  document.getElementById('tag').textContent = options.length === 1 ? 'Scelta del giorno' : 'Preferiresti';
 
   options.forEach((t, i) => {
     const half = document.createElement('div');
