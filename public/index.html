@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink: #1a1208;
+      --paper: #f5f0e8;
+      --cream: #ede6d3;
+      --gold: #c8952a;
+      --rust: #8b3a1e;
+      --muted: #8a7d68;
+      --shadow: rgba(26,18,8,0.15);
+    }
+
+    body {
+      background: var(--paper);
+      color: var(--ink);
+      font-family: 'DM Mono', monospace;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0 16px 60px;
+      background-image:
+        radial-gradient(ellipse at 20% 10%, rgba(200,149,42,0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 90%, rgba(139,58,30,0.06) 0%, transparent 50%);
+    }
+
+    /* ── Navbar ── */
+    .navbar {
+      width: 100%;
+      max-width: 720px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 0 0;
+    }
+
+    .nav-link {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      text-decoration: none;
+      color: var(--muted);
+      border-bottom: 2px solid transparent;
+      padding-bottom: 2px;
+      transition: color 0.15s, border-color 0.15s;
+    }
+
+    .nav-link:hover { color: var(--ink); border-color: var(--ink); }
+    .nav-link.active { color: var(--ink); border-color: var(--gold); }
+
+    /* ── Header ── */
+    header {
+      width: 100%;
+      max-width: 720px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 36px 0 32px;
+      border-bottom: 2px solid var(--ink);
+      margin-bottom: 40px;
+    }
+
+    .eyebrow {
+      font-size: 11px;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 10px;
+    }
+
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(40px, 8vw, 72px);
+      font-weight: 700;
+      line-height: 1;
+      letter-spacing: -0.02em;
+      text-align: center;
+    }
+
+    h1 em { font-style: italic; color: var(--gold); }
+
+    .subtitle {
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      margin-top: 12px;
+    }
+
+    /* ── Scelte ── */
+    .choices {
+      width: 100%;
+      max-width: 720px;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+      padding-right: 6px;
+      animation: slideUp 0.4s ease both;
+    }
+
+    .card {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      background: var(--cream);
+      border: 2px solid var(--ink);
+      border-radius: 2px;
+      padding: 32px;
+      box-shadow: 6px 6px 0 var(--ink);
+      color: inherit;
+      text-decoration: none;
+      transition: transform 0.12s, box-shadow 0.12s;
+    }
+
+    a.card:hover { transform: translate(3px, 3px); box-shadow: 3px 3px 0 var(--ink); }
+    a.card:focus-visible { outline: 3px solid var(--gold); outline-offset: 4px; }
+
+    .text { flex: 1 1 280px; }
+
+    .label {
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .card h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(26px, 5vw, 34px);
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -0.01em;
+      margin-bottom: 10px;
+    }
+
+    .card h2 em { font-style: italic; color: var(--gold); }
+
+    .desc { font-size: 12px; line-height: 1.7; color: var(--muted); max-width: 40ch; }
+
+    .btn {
+      font-size: 12px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      border: 2px solid var(--ink);
+      background: var(--ink);
+      color: var(--paper);
+      padding: 12px 28px;
+      border-radius: 1px;
+      white-space: nowrap;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    a.card:hover .btn { background: var(--gold); border-color: var(--gold); color: var(--ink); }
+
+    .soon { background: transparent; border: 2px dashed var(--muted); box-shadow: none; opacity: 0.8; }
+    .soon h2 { font-style: italic; color: var(--muted); }
+
+    footer {
+      margin-top: 60px; font-size: 10px; letter-spacing: 0.15em;
+      text-transform: uppercase; color: var(--muted); opacity: 0.6;
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .choices { animation: none; }
+      .card, .btn { transition: none; }
+      a.card:hover { transform: none; box-shadow: 6px 6px 0 var(--ink); }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="index.html" class="nav-link active">Home</a>
+  <a href="antologia.html" class="nav-link">Antologia</a>
+</nav>
+
+<header>
+  <p class="eyebrow">Benvenuto</p>
+  <h1>Cosa facciamo <em>oggi</em>?</h1>
+  <p class="subtitle">Scegli da dove iniziare</p>
+</header>
+
+<main class="choices">
+
+  <a class="card" href="OneWordStory.html">
+    <div class="text">
+      <p class="label">Gioco di gruppo</p>
+      <h2>One <em>Word</em> Story</h2>
+      <p class="desc">Scrivete una storia insieme, una parola a testa.</p>
+    </div>
+    <span class="btn">Gioca →</span>
+  </a>
+
+  <a class="card" href="preferiresti.html">
+    <div class="text">
+      <p class="label">Ogni giorno</p>
+      <h2>Il <em>preferiresti</em> del giorno</h2>
+      <p class="desc">Una nuova domanda ogni giorno. Tu cosa scegli?</p>
+    </div>
+    <span class="btn">Leggi →</span>
+  </a>
+
+  <div class="card soon">
+    <div class="text">
+      <p class="label">Presto</p>
+      <h2>Prossimamente</h2>
+      <p class="desc">Qui arriverà qualcosa di nuovo.</p>
+    </div>
+  </div>
+
+</main>
+
+<footer>Giochi tra amici</footer>
+
+</body>
+</html>
