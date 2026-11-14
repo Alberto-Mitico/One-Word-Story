@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Il preferiresti del giorno</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink: #1a1208;
+      --paper: #f5f0e8;
+      --cream: #ede6d3;
+      --gold: #c8952a;
+      --rust: #8b3a1e;
+      --muted: #8a7d68;
+      --shadow: rgba(26,18,8,0.15);
+    }
+
+    body {
+      background: var(--paper);
+      color: var(--ink);
+      font-family: 'DM Mono', monospace;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0 16px 60px;
+      background-image:
+        radial-gradient(ellipse at 20% 10%, rgba(200,149,42,0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 90%, rgba(139,58,30,0.06) 0%, transparent 50%);
+    }
+
+    /* ── Navbar ── */
+    .navbar {
+      width: 100%;
+      max-width: 720px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 0 0;
+    }
+
+    .nav-link {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      text-decoration: none;
+      color: var(--muted);
+      border-bottom: 2px solid transparent;
+      padding-bottom: 2px;
+      transition: color 0.15s, border-color 0.15s;
+    }
+
+    .nav-link:hover { color: var(--ink); border-color: var(--ink); }
+
+    /* ── Header ── */
+    header {
+      width: 100%;
+      max-width: 720px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 36px 0 32px;
+      border-bottom: 2px solid var(--ink);
+      margin-bottom: 40px;
+    }
+
+    .eyebrow {
+      font-size: 11px;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 10px;
+    }
+
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(40px, 8vw, 72px);
+      font-weight: 700;
+      line-height: 1;
+      letter-spacing: -0.02em;
+      text-align: center;
+    }
+
+    h1 em { font-style: italic; color: var(--gold); }
+
+    .subtitle {
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      margin-top: 12px;
+    }
+
+    /* ── Domanda ── */
+    main {
+      width: 100%;
+      max-width: 720px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      padding-right: 6px;
+    }
+
+    .tag, .meta {
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .meta { text-align: center; font-size: 10px; letter-spacing: 0.15em; opacity: 0.8; }
+
+    #question {
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(var(--n, 1), 1fr);
+      background: var(--cream);
+      border: 2px solid var(--ink);
+      border-radius: 2px;
+      box-shadow: 6px 6px 0 var(--ink);
+      animation: slideUp 0.4s ease both;
+    }
+
+    .status { padding: 32px; font-family: 'Playfair Display', serif; font-style: italic; font-size: 20px; color: var(--muted); }
+
+    .half { position: relative; padding: 36px 32px; }
+    .half + .half { border-left: 2px solid var(--ink); }
+
+    .ab { display: block; font-size: 11px; letter-spacing: 0.25em; color: var(--gold); margin-bottom: 14px; }
+
+    .text {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(18px, 2.6vw, 22px);
+      font-weight: 700;
+      line-height: 1.45;
+    }
+
+    .or {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      transform: translate(-50%, -50%);
+      background: var(--ink);
+      color: var(--paper);
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      padding: 8px 10px;
+      border-radius: 100px;
+    }
+
+    /* Scelta singola: non è un aut-aut */
+    #question.single { border-left: 6px solid var(--gold); }
+    #question.single .half { padding: 40px 32px; }
+    #question.single .text { font-size: clamp(20px, 3vw, 26px); }
+
+    footer {
+      margin-top: 60px; font-size: 10px; letter-spacing: 0.15em;
+      text-transform: uppercase; color: var(--muted); opacity: 0.6;
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 600px) {
+      #question { grid-template-columns: 1fr; }
+      .half + .half { border-left: none; border-top: 2px solid var(--ink); }
+      .or { top: 0; left: 50%; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      #question { animation: none; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="index.html" class="nav-link">Home</a>
+  <a href="antologia.html" class="nav-link">Antologia</a>
+</nav>
+
+<header>
+  <p class="eyebrow">Una domanda al giorno</p>
+  <h1>Il <em>preferiresti</em> del giorno</h1>
+  <p class="subtitle" id="date"></p>
+</header>
+
+<main>
+  <p class="tag" id="tag"></p>
+  <div id="question"><p class="status">Carico la domanda…</p></div>
+  <p class="meta" id="meta"></p>
+</main>
+
+<footer>Preferiresti &mdash; una domanda al giorno</footer>
+
+<script>
+/* ── Estrazione: stessa domanda per tutti, nessuna ripetizione finché non sono uscite tutte ── */
+/* ALGO START */
+const START = '2026-11-14'; // giorno della prima domanda (data italiana, AAAA-MM-GG)
+
+function romeToday() {
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Rome', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+}
+
+function dayNumber(iso) {
+  const [y, m, d] = iso.split('-').map(Number);
+  return Math.floor(Date.UTC(y, m - 1, d) / 86400000);
+}
+
+// Ogni blocco separato da una riga di ____ ; ogni riga del blocco è una scelta
+function parseQuestions(text) {
+  return text.split(/^\s*_{3,}\s*$/m)
+    .map(b => b.split(/\r?\n/).map(l => l.trim()).filter(Boolean))
+    .filter(o => o.length > 0);
+}
+
+function mulberry32(a) {
+  return function () {
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+
+// Ordine mescolato di un "giro": dipende solo dal numero del giro
+function shuffled(n, cycle) {
+  const order = Array.from({ length: n }, (_, i) => i);
+  const rnd = mulberry32(cycle * 7919 + 104729);
+  for (let i = n - 1; i > 0; i--) {
+    const j = Math.floor(rnd() * (i + 1));
+    [order[i], order[j]] = [order[j], order[i]];
+  }
+  return order;
+}
+
+function pickIndex(n, day) {
+  const cycle = Math.floor(day / n), pos = day % n;
+  const order = shuffled(n, cycle);
+  // L'ultima di un giro non deve essere la prima del giro dopo
+  if (cycle > 0 && n > 2) {
+    const prevLast = shuffled(n, cycle - 1)[n - 1];
+    if (order[0] === prevLast) [order[0], order[1]] = [order[1], order[0]];
+  }
+  return { index: order[pos], pos, cycle };
+}
+/* ALGO END */
+
+function render(options, pos, total) {
+  const box = document.getElementById('question');
+  box.replaceChildren();
+  box.style.setProperty('--n', options.length);
+  box.className = options.length === 1 ? 'single' : '';
+  document.getElementById('tag').textContent = options.length === 1 ? 'Scelta del giorno' : 'Preferiresti…';
+
+  options.forEach((t, i) => {
+    const half = document.createElement('div');
+    half.className = 'half';
+    if (options.length > 1) {
+      const ab = document.createElement('span');
+      ab.className = 'ab';
+      ab.textContent = String.fromCharCode(65 + i);
+      half.append(ab);
+    }
+    const p = document.createElement('p');
+    p.className = 'text';
+    p.textContent = t;
+    half.append(p);
+    if (i > 0) {
+      const or = document.createElement('span');
+      or.className = 'or';
+      or.textContent = 'oppure';
+      half.append(or);
+    }
+    box.append(half);
+  });
+
+  document.getElementById('meta').textContent = 'Domanda ' + (pos + 1) + ' di ' + total + ' · si rinnova a mezzanotte';
+}
+
+(async function () {
+  document.getElementById('date').textContent = new Intl.DateTimeFormat('it-IT', {
+    timeZone: 'Europe/Rome', weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+  }).format(new Date());
+
+  const box = document.getElementById('question');
+  try {
+    const res = await fetch('preferiresti.txt', { cache: 'no-cache' });
+    if (!res.ok) throw new Error(res.status);
+    const questions = parseQuestions(await res.text());
+    if (!questions.length) throw new Error('vuoto');
+
+    const day = Math.max(0, dayNumber(romeToday()) - dayNumber(START));
+    const { index, pos } = pickIndex(questions.length, day);
+    render(questions[index], pos, questions.length);
+  } catch (e) {
+    box.replaceChildren();
+    const p = document.createElement('p');
+    p.className = 'status';
+    p.textContent = 'Non riesco a caricare la domanda. Riprova tra poco.';
+    box.append(p);
+  }
+})();
+</script>
+
+</body>
+</html>
